@@ -216,6 +216,16 @@ sub _run_tests {
   is( $it->next->name, "Artist 6", "iterator->next ok" );
   is( $it->next, undef, "next past end of resultset ok" );
 
+  lives_ok {
+    my @results = $schema->resultset('Artist')->search({}, {
+        select => ["name", { count => "me.name", -as => "foo" }],
+        as => [qw/name foo/],
+        group_by => ["name"],
+        rows => 1,
+    });
+  } "limit with current source alias and SQL AS executed successfully";
+
+
 # test identifiers over the 30 char limit
   lives_ok {
     my @results = $schema->resultset('CD')->search(undef, {
